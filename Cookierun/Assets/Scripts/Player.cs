@@ -8,9 +8,11 @@ public class Player : MonoBehaviour
     private bool isJumping1;
     private bool isJumping2;
     private bool onGround;
+    private bool isSliding;
     private float startTime = 0;
 
     public AudioClip audioJump;
+    public AudioClip audioSlide;
     public AudioClip audioDamaged;
 
     AudioSource audioSource;
@@ -29,6 +31,7 @@ public class Player : MonoBehaviour
         isJumping1 = false;
         isJumping2 = false;
         onGround = true;
+        isSliding = false;
 
         animator = GetComponent<Animator>();
     }
@@ -43,6 +46,8 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space)) //스페이스가 눌렸을 때
         {
+            onGround = false;
+
             if (!isJumping1)
             {
                 rigid.velocity = new Vector2(rigid.velocity.x, 6.0f);
@@ -64,6 +69,25 @@ public class Player : MonoBehaviour
                     return;
                 }
             }     
+        }
+
+        if(Input.GetKey(KeyCode.LeftShift) && onGround == true) // 슬라이딩
+        {
+            animator.SetBool("Slide", true);
+            if (!isSliding)
+            {
+                PlaySound("SLIDE");
+            }
+            isSliding = true;
+            GetComponent<BoxCollider2D>().offset = new Vector2(0.1f, -0.55f);
+            GetComponent<BoxCollider2D>().size = new Vector2(1.1f, 0.6f);
+        }
+        else
+        {
+            animator.SetBool("Slide", false);
+            isSliding = false;
+            GetComponent<BoxCollider2D>().offset = new Vector2(-0.1f, -0.23f);
+            GetComponent<BoxCollider2D>().size = new Vector2(1f, 1.3f);
         }
     }
 
@@ -108,8 +132,11 @@ public class Player : MonoBehaviour
             case "JUMP":
                 audioSource.clip=audioJump;
                 break;
+            case "SLIDE":
+                audioSource.clip=audioSlide;
+                break;
             case "DAMAGED":
-                audioSource.clip=audioDamaged;
+                audioSource.clip = audioDamaged;
                 break;
         }
         audioSource.Play();
